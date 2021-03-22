@@ -1,10 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 enum InputShortcut { CUT, COPY, PASTE, SELECT_ALL }
 
 typedef CursorMoveCallback = void Function(
     LogicalKeyboardKey key, bool wordModifier, bool lineModifier, bool shift);
-typedef InputShortcutCallback = void Function(InputShortcut shortcut);
+typedef InputShortcutCallback = void Function(InputShortcut? shortcut);
 typedef OnDeleteCallback = void Function(bool forward);
 
 class KeyboardListener {
@@ -58,12 +59,14 @@ class KeyboardListener {
     LogicalKeyboardKey.keyA: InputShortcut.SELECT_ALL,
   };
 
-  KeyboardListener(this.onCursorMove, this.onShortcut, this.onDelete)
-      : assert(onCursorMove != null),
-        assert(onShortcut != null),
-        assert(onDelete != null);
+  KeyboardListener(this.onCursorMove, this.onShortcut, this.onDelete);
 
   bool handleRawKeyEvent(RawKeyEvent event) {
+    if (kIsWeb) {
+      // On web platform, we should ignore the key because it's processed already.
+      return false;
+    }
+
     if (event is! RawKeyDownEvent) {
       return false;
     }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/models/documents/attribute.dart';
@@ -22,7 +23,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  QuillController _controller;
+  QuillController? _controller;
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -64,7 +65,9 @@ class _HomePageState extends State<HomePage> {
         ),
         actions: [],
       ),
-      drawer: Material(
+      drawer: Container(
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
         color: Colors.grey.shade800,
         child: _buildMenuBar(context),
       ),
@@ -72,15 +75,15 @@ class _HomePageState extends State<HomePage> {
         focusNode: FocusNode(),
         onKey: (RawKeyEvent event) {
           if (event.data.isControlPressed && event.character == 'b') {
-            if (_controller
+            if (_controller!
                 .getSelectionStyle()
                 .attributes
                 .keys
                 .contains("bold")) {
-              _controller
+              _controller!
                   .formatSelection(Attribute.clone(Attribute.bold, null));
             } else {
-              _controller.formatSelection(Attribute.bold);
+              _controller!.formatSelection(Attribute.bold);
               print("not bold");
             }
           }
@@ -92,43 +95,54 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildWelcomeEditor(BuildContext context) {
     return SafeArea(
-      child: Stack(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Container(
-            height: MediaQuery.of(context).size.height * 0.88,
-            color: Colors.white,
-            padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-            child: QuillEditor(
-              controller: _controller,
-              scrollController: ScrollController(),
-              scrollable: true,
-              focusNode: _focusNode,
-              autoFocus: false,
-              readOnly: false,
-              placeholder: 'Add content',
-              enableInteractiveSelection: true,
-              expands: false,
-              padding: EdgeInsets.zero,
-              customStyles: DefaultStyles(
-                h1: DefaultTextBlockStyle(
-                    TextStyle(
-                      fontSize: 32.0,
-                      color: Colors.black,
-                      height: 1.15,
-                      fontWeight: FontWeight.w300,
-                    ),
-                    Tuple2(16.0, 0.0),
-                    Tuple2(0.0, 0.0),
-                    null),
-                sizeSmall: TextStyle(fontSize: 9.0),
+          Expanded(
+            flex: 15,
+            child: Container(
+              color: Colors.white,
+              padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+              child: QuillEditor(
+                controller: _controller!,
+                scrollController: ScrollController(),
+                scrollable: true,
+                focusNode: _focusNode,
+                autoFocus: false,
+                readOnly: false,
+                placeholder: 'Add content',
+                enableInteractiveSelection: true,
+                expands: false,
+                padding: EdgeInsets.zero,
+                customStyles: DefaultStyles(
+                  h1: DefaultTextBlockStyle(
+                      TextStyle(
+                        fontSize: 32.0,
+                        color: Colors.black,
+                        height: 1.15,
+                        fontWeight: FontWeight.w300,
+                      ),
+                      Tuple2(16.0, 0.0),
+                      Tuple2(0.0, 0.0),
+                      null),
+                  sizeSmall: TextStyle(fontSize: 9.0),
+                ),
               ),
             ),
           ),
-          Container(
-            child: QuillToolbar.basic(
-                controller: _controller,
-                onImagePickCallback: _onImagePickCallback),
-          ),
+          kIsWeb
+              ? Expanded(
+                  child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                  child: QuillToolbar.basic(
+                      controller: _controller!,
+                      onImagePickCallback: _onImagePickCallback),
+                ))
+              : Container(
+                  child: QuillToolbar.basic(
+                      controller: _controller!,
+                      onImagePickCallback: _onImagePickCallback),
+                ),
         ],
       ),
     );
@@ -137,7 +151,6 @@ class _HomePageState extends State<HomePage> {
   // Renders the image picked by imagePicker from local file storage
   // You can also upload the picked image to any server (eg : AWS s3 or Firebase) and then return the uploaded image URL
   Future<String> _onImagePickCallback(File file) async {
-    if (file == null) return null;
     // Copies the picked file from temporary cache to applications directory
     Directory appDocDir = await getApplicationDocumentsDirectory();
     File copiedFile =
@@ -146,15 +159,33 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildMenuBar(BuildContext context) {
-    final itemStyle = TextStyle(color: Colors.white);
-    return ListView(
+    Size size = MediaQuery.of(context).size;
+    final itemStyle = TextStyle(
+      color: Colors.white,
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+    );
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        Divider(
+          thickness: 2,
+          color: Colors.white,
+          indent: size.width * 0.1,
+          endIndent: size.width * 0.1,
+        ),
         ListTile(
-          title: Text('Read only demo', style: itemStyle),
+          title: Center(child: Text('Read only demo', style: itemStyle)),
           dense: true,
           visualDensity: VisualDensity.compact,
           onTap: _readOnly,
-        )
+        ),
+        Divider(
+          thickness: 2,
+          color: Colors.white,
+          indent: size.width * 0.1,
+          endIndent: size.width * 0.1,
+        ),
       ],
     );
   }
