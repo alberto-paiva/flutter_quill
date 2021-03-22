@@ -123,9 +123,9 @@ class RawEditorState extends EditorState
   final LayerLink _endHandleLayerLink = LayerLink();
 
   @override
-  void userUpdateTextEditingValue(
+  TextEditingValue userUpdateTextEditingValue(
       TextEditingValue value, SelectionChangedCause cause) {
-    widget.controller.plainTextEditingValue;
+    return widget.controller.plainTextEditingValue;
   }
 
   /// Whether to create an input connection with the platform for text editing
