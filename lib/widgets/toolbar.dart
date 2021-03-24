@@ -737,6 +737,8 @@ class _ColorButtonState extends State<ColorButton> {
   }
 
   void _changeColor(Color color) {
+    if (!mounted) return;
+    
     String hex = color.value.toRadixString(16);
     if (hex.startsWith('ff')) {
       hex = hex.substring(2);
