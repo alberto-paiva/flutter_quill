@@ -663,8 +663,7 @@ class _ColorButtonState extends State<ColorButton> {
   }
 
   @override
-  void initState() {
-    super.initState();
+  void initState() {    
     _isToggledColor = _getIsToggledColor(_selectionStyle.attributes);
     _isToggledBackground = _getIsToggledBackground(_selectionStyle.attributes);
     _isWhite = _isToggledColor &&
@@ -672,6 +671,7 @@ class _ColorButtonState extends State<ColorButton> {
     _isWhitebackground = _isToggledBackground &&
         _selectionStyle.attributes["background"]!.value == '#ffffff';
     widget.controller.addListener(_didChangeEditingValue);
+    super.initState();
   }
 
   bool _getIsToggledColor(Map<String, Attribute> attrs) {
@@ -700,7 +700,7 @@ class _ColorButtonState extends State<ColorButton> {
 
   @override
   void dispose() {
-    widget.controller.removeListener(_didChangeEditingValue);
+    //widget.controller.removeListener(_didChangeEditingValue);
     super.dispose();
   }
 
@@ -736,9 +736,7 @@ class _ColorButtonState extends State<ColorButton> {
     );
   }
 
-  void _changeColor(Color color) {
-    if (!mounted) return;
-    
+  void _changeColor(Color color) {  
     String hex = color.value.toRadixString(16);
     if (hex.startsWith('ff')) {
       hex = hex.substring(2);
@@ -746,7 +744,7 @@ class _ColorButtonState extends State<ColorButton> {
     hex = '#$hex';
     widget.controller.formatSelection(
         widget.background ? BackgroundAttribute(hex) : ColorAttribute(hex));
-    Navigator.of(context).pop();
+    Navigator.pop(context, true);
   }
 
   _showColorPicker() {
