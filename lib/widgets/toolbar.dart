@@ -650,6 +650,7 @@ class _ColorButtonState extends State<ColorButton> {
   Style get _selectionStyle => widget.controller.getSelectionStyle();
 
   void _didChangeEditingValue() {
+    if(!mounted) return;
     setState(() {
       _isToggledColor =
           _getIsToggledColor(widget.controller.getSelectionStyle().attributes);
@@ -700,7 +701,7 @@ class _ColorButtonState extends State<ColorButton> {
 
   @override
   void dispose() {
-    //widget.controller.removeListener(_didChangeEditingValue);
+    widget.controller.removeListener(_didChangeEditingValue);
     super.dispose();
   }
 
@@ -736,7 +737,7 @@ class _ColorButtonState extends State<ColorButton> {
     );
   }
 
-  void _changeColor(Color color) {  
+  void _changeColor(Color color, BuildContext context) {  
     String hex = color.value.toRadixString(16);
     if (hex.startsWith('ff')) {
       hex = hex.substring(2);
@@ -744,7 +745,7 @@ class _ColorButtonState extends State<ColorButton> {
     hex = '#$hex';
     widget.controller.formatSelection(
         widget.background ? BackgroundAttribute(hex) : ColorAttribute(hex));
-    Navigator.pop(context, true);
+    if(mounted) Navigator.pop(context, true);
   }
 
   _showColorPicker() {
@@ -756,7 +757,7 @@ class _ColorButtonState extends State<ColorButton> {
           content: SingleChildScrollView(
             child: MaterialPicker(
               pickerColor: Color(0),
-              onColorChanged: _changeColor,
+              onColorChanged: (c) => _changeColor(c, context),
             ),
           )),
     );
