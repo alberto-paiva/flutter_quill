@@ -650,7 +650,7 @@ class _ColorButtonState extends State<ColorButton> {
   Style get _selectionStyle => widget.controller.getSelectionStyle();
 
   void _didChangeEditingValue() {
-    if(!mounted) return;
+    if (!mounted) return;
     setState(() {
       _isToggledColor =
           _getIsToggledColor(widget.controller.getSelectionStyle().attributes);
@@ -664,7 +664,8 @@ class _ColorButtonState extends State<ColorButton> {
   }
 
   @override
-  void initState() {    
+  void initState() {
+    super.initState();
     _isToggledColor = _getIsToggledColor(_selectionStyle.attributes);
     _isToggledBackground = _getIsToggledBackground(_selectionStyle.attributes);
     _isWhite = _isToggledColor &&
@@ -672,7 +673,6 @@ class _ColorButtonState extends State<ColorButton> {
     _isWhitebackground = _isToggledBackground &&
         _selectionStyle.attributes["background"]!.value == '#ffffff';
     widget.controller.addListener(_didChangeEditingValue);
-    super.initState();
   }
 
   bool _getIsToggledColor(Map<String, Attribute> attrs) {
@@ -737,7 +737,7 @@ class _ColorButtonState extends State<ColorButton> {
     );
   }
 
-  void _changeColor(Color color, BuildContext context) {  
+  void _changeColor(Color color) {
     String hex = color.value.toRadixString(16);
     if (hex.startsWith('ff')) {
       hex = hex.substring(2);
@@ -745,22 +745,31 @@ class _ColorButtonState extends State<ColorButton> {
     hex = '#$hex';
     widget.controller.formatSelection(
         widget.background ? BackgroundAttribute(hex) : ColorAttribute(hex));
-    if(mounted) Navigator.pop(context, true);
   }
 
   _showColorPicker() {
-    showDialog(
+    return showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (context) => AlertDialog(
           title: const Text('Select Color'),
           backgroundColor: Theme.of(context).canvasColor,
           content: SingleChildScrollView(
             child: MaterialPicker(
               pickerColor: Color(0),
-              onColorChanged: (c) => _changeColor(c, context),
+              onColorChanged: (c) {
+                _changeColor(c);
+                Navigator.pop(context, c);
+              },
             ),
           )),
-    );
+    ).then((value) {
+      print('1: $value');
+      if (mounted) {
+        setState(() {
+          _changeColor(value!);
+        });
+      }
+    });
   }
 }
 
